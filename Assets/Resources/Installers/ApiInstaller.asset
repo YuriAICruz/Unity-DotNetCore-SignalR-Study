@@ -12,6 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee5fc100cf760b9449ac4138ca4d129f, type: 3}
   m_Name: ApiInstaller
   m_EditorClassIdentifier: 
-  isSsl: 0
-  domain: 192.168.1.103
-  port: 5000
+  settings: {fileID: 11400000, guid: df75270a34d3e224fb2ffc8e4732708e, type: 2}

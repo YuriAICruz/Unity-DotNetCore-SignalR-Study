@@ -6,77 +6,80 @@ using System.Threading.Tasks;
 using Graphene.ApiCommunication;
 using Zenject;
 
-public class SocketTest : MonoBehaviour
+namespace Graphene.SignalR
 {
-    private int x;
-    private static HubConnection connection;
-
-    public string serverUrl = "http://localhost:59890/chat";
-
-    [Inject] private Http _http;
-    
-    void Start()
+    public class SocketTest : MonoBehaviour
     {
-        SetPosition(5);
-        
-        Debug.Log("Hello World!");
-        
-        connection = new HubConnectionBuilder()
-            .WithUrl(serverUrl, options => { options.Cookies = _http.GetCookieContainer(); })
-            .Build();
-        
-        connection.Closed += async (error) =>
+        private int x;
+        private static HubConnection connection;
+
+        public string serverUrl = "http://localhost:59890/chat";
+
+        [Inject] private Http _http;
+
+        void Start()
         {
-            await Task.Delay(Random.Range(0, 5) * 1000);
-            await connection.StartAsync();
-        };
+            SetPosition(5);
 
-        Connect();
+            Debug.Log("Hello World!");
 
-        Send(Random.Range(0, 5).ToString());
-        Send(Random.Range(0, 5).ToString());
-        Send(Random.Range(0, 5).ToString());
-    }
+            connection = new HubConnectionBuilder()
+                .WithUrl(serverUrl, options => { options.Cookies = _http.GetCookieContainer(); })
+                .Build();
 
-    private async void Connect()
-    {
-        connection.On<string, string>("broadcastMessage", (name, message) =>
-        {
-            Debug.Log($"{name}: {message}");
-            SetPosition(int.Parse(message));
-        });
+            connection.Closed += async (error) =>
+            {
+                await Task.Delay(Random.Range(0, 5) * 1000);
+                await connection.StartAsync();
+            };
 
-        try
-        {
-            await connection.StartAsync();
+            Connect();
 
-            Debug.Log("Connection started");
+            Send(Random.Range(0, 5).ToString());
+            Send(Random.Range(0, 5).ToString());
+            Send(Random.Range(0, 5).ToString());
         }
-        catch (System.Exception ex)
-        {
-            Debug.Log(ex.Message);
-        }
-    }
 
-    private async void Send(string msg)
-    {
-        try
+        private async void Connect()
         {
-            await connection.InvokeAsync("Send", connection.GetHashCode().ToString(), msg);
+            connection.On<string, string>("broadcastMessage", (name, message) =>
+            {
+                Debug.Log($"{name}: {message}");
+                SetPosition(int.Parse(message));
+            });
+
+            try
+            {
+                await connection.StartAsync();
+
+                Debug.Log("Connection started");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.Log(ex.Message);
+            }
         }
-        catch (System.Exception ex)
+
+        private async void Send(string msg)
         {
-            Debug.Log(ex.Message);
+            try
+            {
+                await connection.InvokeAsync("Send", connection.GetHashCode().ToString(), msg);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.Log(ex.Message);
+            }
         }
-    }
 
-    private void SetPosition(int x)
-    {
-        this.x = x;
-    }
+        private void SetPosition(int x)
+        {
+            this.x = x;
+        }
 
-    private void Update()
-    {
-        transform.position = new Vector2(x, 0);
+        private void Update()
+        {
+            transform.position = new Vector2(x, 0);
+        }
     }
 }
