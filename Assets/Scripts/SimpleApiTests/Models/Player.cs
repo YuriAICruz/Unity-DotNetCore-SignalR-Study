@@ -1,4 +1,4 @@
-﻿namespace Graphene.ApiCommunication.Models
+﻿namespace SimpleApiTests.Models
 {
     public class Player
     {

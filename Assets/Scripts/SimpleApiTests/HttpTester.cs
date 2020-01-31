@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Graphene.ApiCommunication;
-using Graphene.ApiCommunication.Models;
+using SimpleApiTests.Models;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-namespace SignalRStudy
+namespace SimpleApiTests
 {
     public class HttpTester : MonoBehaviour
     {

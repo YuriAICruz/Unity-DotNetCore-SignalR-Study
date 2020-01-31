@@ -1,4 +1,4 @@
-﻿namespace SimpleApiTests.Models
+﻿namespace Models
 {
     public class LoginModelView
     {
