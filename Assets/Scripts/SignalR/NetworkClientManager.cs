@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Graphene.ApiCommunication;
+using Graphene.SharedModels.Network;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;

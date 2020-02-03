@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Controllers;
 using Graphene.ApiCommunication;
-using Models;
+using Graphene.SharedModels.ModelView;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;

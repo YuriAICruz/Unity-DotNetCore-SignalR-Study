@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Graphene.SignalR
+namespace Graphene.SharedModels.Network
 {
     public class NetworkClients
     {
@@ -31,7 +31,7 @@ namespace Graphene.SignalR
             if(_connections[i].Count <= 0)
                 Remove(userName);
         }
-        
+
         public int Add(string userName, string id)
         {
             var i = _connections.FindIndex(x => x.userName == userName);

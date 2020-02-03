@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Graphene.ApiCommunication;
+using Graphene.SharedModels.ModelView;
 using Graphene.SignalR;
-using Models;
 using UnityEngine;
 using Zenject;
 
@@ -21,7 +21,7 @@ namespace Controllers
         public event Action ShowSignUp;
         public event Action ShowSignIn;
 
-        public User CurrentUser { get; private set; }
+        public UserModelView CurrentUserModelView { get; private set; }
         public bool IsLoggedIn { get; private set; }
 
         private Queue<Action> _workingThreads;
@@ -41,13 +41,13 @@ namespace Controllers
 
             IsLoggedIn = false;
             _isBusy = true;
-            _http.GetAsync<User>("auth", (res) =>
+            _http.GetAsync<UserModelView>("auth", (res) =>
             {
                 WorkerFree();
                 if (res.Success)
                 {
                     OnLoggedIn(res.Response);
-                    Debug.Log(CurrentUser);
+                    Debug.Log(CurrentUserModelView);
                     return;
                 }
 
@@ -55,13 +55,13 @@ namespace Controllers
             }).ContinueWith(CallError);
         }
 
-        void OnLoggedIn(User user)
+        void OnLoggedIn(UserModelView userModelView)
         {
             IsLoggedIn = true;
             UserLoggedIn?.Invoke();
-            CurrentUser = user;
+            CurrentUserModelView = userModelView;
             
-            _network?.Connect(CurrentUser.UserName);
+            _network?.Connect(CurrentUserModelView.UserName);
         }
 
         private void CallError<T>(Task<HttpResponse<T>> task)
@@ -117,7 +117,7 @@ namespace Controllers
             }
 
             _isBusy = true;
-            _http.PostAsync<User, LoginModelView>("auth/signIn", loginModelView,
+            _http.PostAsync<UserModelView, LoginModelView>("auth/signIn", loginModelView,
                     (res) => OnLoginResult(res, onResponse))
                 .ContinueWith(CallError);
         }
@@ -166,7 +166,7 @@ namespace Controllers
 
         #region Callbacks
 
-        private void OnLoginResult(HttpResponse<User> result, Action<bool> onResponse)
+        private void OnLoginResult(HttpResponse<UserModelView> result, Action<bool> onResponse)
         {
             _isBusy = false;
 

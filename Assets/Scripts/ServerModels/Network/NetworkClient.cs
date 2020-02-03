@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Graphene.SignalR
+namespace Graphene.SharedModels.Network
 {
     public class NetworkClient
     {

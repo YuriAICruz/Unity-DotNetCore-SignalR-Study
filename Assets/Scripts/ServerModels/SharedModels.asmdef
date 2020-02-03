@@ -1,10 +1,6 @@
 {
-    "name": "Graphene.SignalR",
-    "references": [
-        "GUID:606ac477607d7984984e44ecf49e9e6c",
-        "GUID:0d8beb7f090555447a6cf5ce9e54dbb4",
-        "GUID:cd58fafd5808b8f4aa838a7bebd0c046"
-    ],
+    "name": "Graphene.SharedModels",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

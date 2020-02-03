@@ -6,6 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/StaticAssets/Scenes/ApiIntegration.unity
+    path: Assets/StaticAssets/Scenes/Intro.unity
     guid: 8fdb8962b6d28384fb64fed4ced8c38a
+  - enabled: 1
+    path: Assets/StaticAssets/Scenes/CharacterSelection.unity
+    guid: 3197d57311f9e5f4db6d3660674788aa
+  - enabled: 1
+    path: Assets/StaticAssets/Scenes/Lobby.unity
+    guid: 7ad731a60d7a3ff428f6ec0e9b5eab56
+  - enabled: 1
+    path: Assets/StaticAssets/Scenes/Game.unity
+    guid: 4c8f486d419617a4b95eb23cc5c97786
   m_configObjects: {}
