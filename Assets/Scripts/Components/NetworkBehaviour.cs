@@ -1,40 +1,92 @@
 ﻿using System;
+using Graphene.SignalR;
 using UnityEngine;
+using Zenject;
 
 namespace Components
 {
+    [RequireComponent(typeof(NetworkId))]
     public class NetworkBehaviour : MonoBehaviour
     {
-        protected Guid _id;
-        protected bool isLocal;
-        private bool init;
+        [Inject] protected NetworkClientManager NetworkController;
+        protected NetworkId NetworkId;
+
+
+        public bool IsLocal
+        {
+            get => NetworkId.isLocal;
+        }
+
+        public Guid Id
+        {
+            get => NetworkId.Id;
+        }
+
+
+        protected virtual void Awake()
+        {
+            GetNetId();
+        }
 
         protected virtual void Start()
         {
-            GenerateId();
+            NetworkId.Initialize();
         }
 
-        private void GenerateId()
+        private void GetNetId()
         {
-            if (init) return;
+            if (NetworkId == null)
+            {
+                NetworkId = GetComponent<NetworkId>();
+                
+                if (NetworkId == null)
+                {
+                    NetworkId = gameObject.AddComponent<NetworkId>();
+                }
+            }
 
-            init = true;
-            isLocal = true;
-            _id = Guid.NewGuid();
         }
 
-        public void Initialize(Guid id)
+        private void Initialize()
         {
-            _id = id;
-            isLocal = false;
-            init = true;
+            GetNetId();
+
+            NetworkId.Initialize();
         }
 
-        public Guid GetId()
+        private void Initialize(Guid id)
         {
-            GenerateId();
+            GetNetId();
+
+            NetworkId.Initialize(id);
+        }
+
+        public class Factory : PlaceholderFactory<NetworkBehaviour>
+        {
+            private void Setup(NetworkBehaviour behaviour)
+            {
+                behaviour.name = "NetworkBehaviourClone";
+                behaviour.transform.SetParent(null, false);
+            }
             
-            return _id;
+            
+            public override NetworkBehaviour Create()
+            {
+                var behaviour = base.Create();
+                Setup(behaviour);
+                behaviour.Initialize();
+
+                return behaviour;
+            }
+
+            public NetworkBehaviour Create(Guid id)
+            {
+                var behaviour = base.Create();
+                Setup(behaviour);
+                behaviour.Initialize(id);
+
+                return behaviour;
+            }
         }
     }
 }

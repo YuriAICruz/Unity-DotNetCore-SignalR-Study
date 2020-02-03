@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Graphene.ApiCommunication;
+using Graphene.SignalR;
 using Models;
 using UnityEngine;
 using Zenject;
@@ -27,6 +28,8 @@ namespace Controllers
 
         private bool _isBusy;
 
+        [Inject] private NetworkClientManager _network;
+
 
         public AuthenticationController(Http http, INotificationService notification)
         {
@@ -43,15 +46,22 @@ namespace Controllers
                 WorkerFree();
                 if (res.Success)
                 {
-                    IsLoggedIn = true;
-                    UserLoggedIn?.Invoke();
-                    CurrentUser = res.Response;
+                    OnLoggedIn(res.Response);
                     Debug.Log(CurrentUser);
                     return;
                 }
 
                 Debug.LogError(res.StatusCode);
             }).ContinueWith(CallError);
+        }
+
+        void OnLoggedIn(User user)
+        {
+            IsLoggedIn = true;
+            UserLoggedIn?.Invoke();
+            CurrentUser = user;
+            
+            _network?.Connect(CurrentUser.UserName);
         }
 
         private void CallError<T>(Task<HttpResponse<T>> task)
@@ -107,7 +117,7 @@ namespace Controllers
             }
 
             _isBusy = true;
-            _http.PostAsync<LoginModelView, LoginModelView>("auth/signIn", loginModelView,
+            _http.PostAsync<User, LoginModelView>("auth/signIn", loginModelView,
                     (res) => OnLoginResult(res, onResponse))
                 .ContinueWith(CallError);
         }
@@ -156,14 +166,13 @@ namespace Controllers
 
         #region Callbacks
 
-        private void OnLoginResult(HttpResponse<LoginModelView> result, Action<bool> onResponse)
+        private void OnLoginResult(HttpResponse<User> result, Action<bool> onResponse)
         {
             _isBusy = false;
 
             if (result.Success)
-            {
-                IsLoggedIn = true;
-                UserLoggedIn?.Invoke();
+            { 
+                OnLoggedIn(result.Response);
                 onResponse?.Invoke(true);
                 return;
             }

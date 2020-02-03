@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a870c75e8b864a52b17cc5eea19b3264, type: 3}
-  m_Name: ApiIntegration
+  m_Script: {fileID: 11500000, guid: cdb45658eb044883925345451feb77f9, type: 3}
+  m_Name: NetworkingSettings
   m_EditorClassIdentifier: 
-  settings: {fileID: 11400000, guid: bd3348f9ac1a9d84eb73da12fe256958, type: 2}
+  playerPrefab: {fileID: 4141025412899417268, guid: 03b7e22be902e764c89f84076a712b0f,
+    type: 3}

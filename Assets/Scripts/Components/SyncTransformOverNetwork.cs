@@ -1,23 +1,23 @@
 ﻿using System;
 using Controllers;
 using Graphene.SignalR;
-using UnityEditorInternal;
 using UnityEngine;
 using Zenject;
 
 namespace Components
 {
+    
     public class SyncTransformOverNetwork : NetworkBehaviour
     {
-        [Inject] public NetworkClientManager _networkController;
 
         private Transform _transform;
         private TransformData _transformData;
 
         private const string Handler = "TransformUpdate";
 
-        protected virtual void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             _transformData = new TransformData();
         }
 
@@ -27,9 +27,9 @@ namespace Components
 
             _transform = transform;
 
-            if (!isLocal)
+            if (!IsLocal)
             {
-                _networkController.RegisterHandler<TransformData>(Handler, _id, UpdateTransform);
+                NetworkController.RegisterHandler<TransformData>(Handler, NetworkId.Id, UpdateTransform);
             }
             else
             {
@@ -39,7 +39,7 @@ namespace Components
 
         private void Update()
         {
-            if (isLocal)
+            if (IsLocal)
             {
                 Sync();
             }
@@ -55,7 +55,7 @@ namespace Components
             {
                 _transformData.SetTransform(_transform);
 
-                _networkController.SendToAll(Handler, _id, _transformData);
+                NetworkController.SendToAll(Handler, NetworkId.Id, _transformData);
             }
         }
 
