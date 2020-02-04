@@ -29,8 +29,9 @@ namespace Graphene.SignalR
         
         private string _userName;
 
-        private NetworkClients _connections = new NetworkClients();
-        
+        private NetworkClients _connections;
+
+        public NetworkClient Self => _connections.Self;
 
         public NetworkClientManager(string baseUrl, string socketPath, int timeout, Http http)
         {
@@ -44,6 +45,8 @@ namespace Graphene.SignalR
 
             _connection.On<string, string>("OnConnected", ClientConnected);
             _connection.On<string, string>("OnDisconnected", ClientDisconnected);
+            
+            _connection.On<NetworkClient>("OnClientUpdate", ClientUpdated);
 
             _connection.Closed += ReConnect;
 
@@ -57,8 +60,30 @@ namespace Graphene.SignalR
         }
 
         
+        public async Task Sync()
+        {
+            if(!_connected || !Self.IsDirty()) return;
+            
+            try
+            {
+                await _connection.InvokeAsync("UpdatePlayer", Self);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.Log(ex.Message);
+            }
+        }
+
+        private void ClientUpdated(NetworkClient client)
+        {
+            Debug.Log(client);
+            _connections.Update(client);
+        }
+
+        
         public async Task Connect(string userName)
         {
+            _connections = new NetworkClients(userName);
             _userName = userName;
             
             if (_isDisposed)
@@ -111,6 +136,7 @@ namespace Graphene.SignalR
         {
             if (_userName == userName)
             {
+                _connections.AddSelf(userName, id);
                 return;
             }
 
@@ -198,13 +224,27 @@ namespace Graphene.SignalR
 
         #region Sender
 
-        public async void SendToAll<T>(string handler, Guid id, T updateTransform)
+        public async void SendToAll<T>(string handler, Guid id, T data)
         {
             if(!_connected) return;
             
             try
             {
-                await _connection.InvokeAsync("SendToAll", handler, id, JsonConvert.SerializeObject(updateTransform));
+                await _connection.InvokeAsync("SendToAllFromId", handler, id, JsonConvert.SerializeObject(data));
+            }
+            catch (System.Exception ex)
+            {
+                Debug.Log(ex.Message);
+            }
+        }
+        
+        public async void SendToAll<T>(string handler, T data)
+        {
+            if(!_connected) return;
+            
+            try
+            {
+                await _connection.InvokeAsync("SendToAll", handler, Self.userName, JsonConvert.SerializeObject(data));
             }
             catch (System.Exception ex)
             {

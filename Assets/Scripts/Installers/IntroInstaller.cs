@@ -1,11 +1,13 @@
 using Presentation.Managers;
-using UnityEngine;
 using Zenject;
 
-public class IntroInstaller : MonoInstaller
+namespace Installers
 {
-    public override void InstallBindings()
+    public class IntroInstaller : MonoInstaller
     {
-        Container.Bind<IntroManager>().AsSingle().NonLazy();
+        public override void InstallBindings()
+        {
+            Container.Bind<IntroManager>().AsSingle().NonLazy();
+        }
     }
 }
