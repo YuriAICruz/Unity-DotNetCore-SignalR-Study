@@ -10,9 +10,9 @@ namespace Graphene.SharedModels.Network
 
         public IReadOnlyList<NetworkClient> Clients => _connections;
 
-        public NetworkClient Self => _connections[_ownerId];
+        public NetworkClient Self => _ownerId >= 0 ? _connections[_ownerId] : null;
 
-        private int _ownerId;
+        private int _ownerId = -1;
 
         public NetworkClients(string userName)
         {
@@ -68,7 +68,7 @@ namespace Graphene.SharedModels.Network
             {
                 _connections.Add(new NetworkClient(userName, new List<string>() {id}));
 
-                i = _connections.Count-1;
+                i = _connections.Count - 1;
             }
 
             return i;
@@ -86,7 +86,7 @@ namespace Graphene.SharedModels.Network
         public void Update(NetworkClient client)
         {
             var player = _connections.Find(x => x.userName == client.userName);
-            
+
             if (player != null)
                 player.Update(client);
             else

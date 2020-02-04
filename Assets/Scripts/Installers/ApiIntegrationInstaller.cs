@@ -18,6 +18,7 @@ namespace Installers
             Container.BindInstance(settings);
             
             Container.Bind<AuthenticationController>().AsSingle();
+            Container.Bind<CharactersController>().AsSingle();
 
 //            Container.BindIFactory<NetworkFactory>().FromComponentInNewPrefab(settings.playerPrefab);
 //            Container.Bind<NetworkBehaviour>().FromFactory<NetworkFactory>();

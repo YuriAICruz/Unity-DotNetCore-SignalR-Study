@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Graphene.ApiCommunication;
 using Graphene.SharedModels.Network;
@@ -16,22 +17,24 @@ namespace Graphene.SignalR
 {
     public class NetworkClientManager : IDisposable
     {
-        public Action OnConnected, OnDisconnected;
+        public event Action OnConnected, OnDisconnected;
 
-        public Action<NetworkClient> OnClientConnected, OnClientDisconnected;
-        
+        public event Action<NetworkClient> OnClientConnected, OnClientDisconnected, OnClientUpdate;
+
         private readonly int _timeout;
         private readonly Http _http;
 
         private readonly HubConnection _connection;
         private bool _isDisposed;
         private bool _connected;
-        
+        public bool Connected => _connected;
+
         private string _userName;
 
         private NetworkClients _connections;
 
         public NetworkClient Self => _connections.Self;
+        public IReadOnlyList<NetworkClient> Clients => _connections.Clients;
 
         public NetworkClientManager(string baseUrl, string socketPath, int timeout, Http http)
         {
@@ -45,7 +48,7 @@ namespace Graphene.SignalR
 
             _connection.On<string, string>("OnConnected", ClientConnected);
             _connection.On<string, string>("OnDisconnected", ClientDisconnected);
-            
+
             _connection.On<NetworkClient>("OnClientUpdate", ClientUpdated);
 
             _connection.Closed += ReConnect;
@@ -59,11 +62,11 @@ namespace Graphene.SignalR
             _isDisposed = true;
         }
 
-        
+
         public async Task Sync()
         {
-            if(!_connected || !Self.IsDirty()) return;
-            
+            if (!_connected || !Self.IsDirty()) return;
+
             try
             {
                 await _connection.InvokeAsync("UpdatePlayer", Self);
@@ -78,14 +81,16 @@ namespace Graphene.SignalR
         {
             Debug.Log(client);
             _connections.Update(client);
+            
+            OnClientUpdate?.Invoke(client);
         }
 
-        
+
         public async Task Connect(string userName)
         {
             _connections = new NetworkClients(userName);
             _userName = userName;
-            
+
             if (_isDisposed)
                 return;
 #if UNITY_EDITOR
@@ -104,19 +109,19 @@ namespace Graphene.SignalR
                 ReConnect(ex);
             }
         }
-        
+
         private async Task ReConnect(Exception error)
         {
             Debug.LogError(error);
 
             if (_connected)
                 OnDisconnectedToServer();
-            
+
             await Task.Delay(_timeout);
             await Connect(_userName);
         }
 
-        
+
         private void OnDisconnectedToServer()
         {
             _connected = false;
@@ -126,37 +131,37 @@ namespace Graphene.SignalR
 
         private void OnConnectedToServer()
         {
-            _connected = true;
-            OnConnected?.Invoke();
-            Debug.Log("Connection started");
+            Debug.Log("Connection init");
         }
 
-        
+
         private void ClientConnected(string userName, string id)
         {
             if (_userName == userName)
             {
                 _connections.AddSelf(userName, id);
+                _connected = true;
+                OnConnected?.Invoke();
+                Debug.Log("Connection started");
                 return;
             }
 
             var i = _connections.Add(userName, id);
-            
+
             Debug.Log($"OnConnected: {userName} {userName == _userName}");
-            
+
             OnClientConnected?.Invoke(_connections[i]);
-            
         }
-        
+
         private void ClientDisconnected(string userName, string id)
         {
             if (_userName == userName)
             {
                 return;
             }
-            
+
             var i = _connections.FindIndex(userName);
-            
+
             if (i >= 0)
             {
                 OnClientDisconnected?.Invoke(_connections[i]);
@@ -174,8 +179,8 @@ namespace Graphene.SignalR
         {
             _connection.On<Guid, string>(handlerName, (id, json) =>
             {
-                if(guid != id) return;
-                
+                if (guid != id) return;
+
                 try
                 {
                     var res = JsonConvert.DeserializeObject<T>(json);
@@ -194,8 +199,8 @@ namespace Graphene.SignalR
         {
             _connection.On<Guid, float>(handlerName, (id, value) =>
             {
-                if(guid != id) return;
-                
+                if (guid != id) return;
+
                 response(value);
             });
         }
@@ -226,8 +231,8 @@ namespace Graphene.SignalR
 
         public async void SendToAll<T>(string handler, Guid id, T data)
         {
-            if(!_connected) return;
-            
+            if (!_connected) return;
+
             try
             {
                 await _connection.InvokeAsync("SendToAllFromId", handler, id, JsonConvert.SerializeObject(data));
@@ -237,11 +242,11 @@ namespace Graphene.SignalR
                 Debug.Log(ex.Message);
             }
         }
-        
+
         public async void SendToAll<T>(string handler, T data)
         {
-            if(!_connected) return;
-            
+            if (!_connected) return;
+
             try
             {
                 await _connection.InvokeAsync("SendToAll", handler, Self.userName, JsonConvert.SerializeObject(data));

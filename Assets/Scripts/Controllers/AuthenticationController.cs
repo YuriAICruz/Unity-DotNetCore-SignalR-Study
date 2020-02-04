@@ -14,7 +14,11 @@ namespace Controllers
     {
         private readonly Http _http;
         private readonly INotificationService _notification;
+        private readonly NetworkClientManager _network;
 
+        public event Action NetworkOn;
+        public event Action NetworkOff;
+        
         public event Action UserLoggedIn;
         public event Action UserSignedIn;
         public event Action UserSignedOut;
@@ -28,13 +32,15 @@ namespace Controllers
 
         private bool _isBusy;
 
-        [Inject] private NetworkClientManager _network;
-
-
-        public AuthenticationController(Http http, INotificationService notification)
+        public AuthenticationController(Http http, INotificationService notification, NetworkClientManager network)
         {
             _http = http;
             _notification = notification;
+            _network = network;
+
+            _network.OnConnected += NetworkConnected;
+            _network.OnDisconnected += NetworkDisconnected;
+            
             _workingThreads = new Queue<Action>();
 
             _notification.OnRequestNotAuthorized += NotAuthorized;
@@ -53,6 +59,16 @@ namespace Controllers
 
                 Debug.LogError(res.StatusCode);
             }).ContinueWith(CallError);
+        }
+
+        private void NetworkDisconnected()
+        {
+            NetworkOff?.Invoke();
+        }
+
+        private void NetworkConnected()
+        {
+            NetworkOn?.Invoke();    
         }
 
         void OnLoggedIn(UserModelView userModelView)

@@ -11,7 +11,7 @@ namespace Installers
         
         public override void InstallBindings()
         {
-            Container.Bind<CharacterSelectionManager>().AsSingle().NonLazy();
+            Container.Bind<CharacterSelectionManager>().AsSingle();
 
             Container.BindFactory<SelectCharacterButton, SelectCharacterButton.Factory>().FromComponentInNewPrefab(prefab);
         }
