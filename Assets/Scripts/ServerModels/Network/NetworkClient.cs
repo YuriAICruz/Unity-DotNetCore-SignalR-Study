@@ -18,6 +18,8 @@ namespace Graphene.SharedModels.Network
         private readonly List<string> connectionId;
 
         private bool _changed;
+        
+        [JsonProperty(TypeNameHandling = TypeNameHandling.None)]
         public ClientStatus Status { get; private set; }
 
         public int SelectedCharacter { get; private set; }
@@ -76,6 +78,7 @@ namespace Graphene.SharedModels.Network
         public void Update(NetworkClient client)
         {
             SelectedCharacter = client.SelectedCharacter;
+            Status = client.Status;
 
             for (int i = 0; i < client.connectionId.Count; i++)
             {
@@ -93,7 +96,7 @@ namespace Graphene.SharedModels.Network
 
         public override string ToString()
         {
-            return $"user: {userName}, ids: {connectionId.Count}, character: {SelectedCharacter}";
+            return $"user: {userName}, ids: {connectionId.Count}, character: {SelectedCharacter} - {Status}";
         }
     }
 }

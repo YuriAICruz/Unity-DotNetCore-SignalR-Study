@@ -22,6 +22,12 @@ namespace Graphene.SharedModels.Network
 
         public int Count => _connections.Count;
 
+
+        public NetworkClient Find(string userName)
+        {
+            return _connections.Find(x => x.userName == userName);
+        }
+        
         public int FindIndex(string userName)
         {
             return _connections.FindIndex(x => x.userName == userName);

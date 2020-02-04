@@ -10,6 +10,8 @@ namespace Presentation.Lobby
         protected override void OnClick()
         {
             _manager.IsReady();
+            //TODO: return button state
+            _button.interactable = false;
         }
     }
 }

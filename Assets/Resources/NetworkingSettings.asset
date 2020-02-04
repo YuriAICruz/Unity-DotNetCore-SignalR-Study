@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdb45658eb044883925345451feb77f9, type: 3}
   m_Name: NetworkingSettings
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 4141025412899417268, guid: 03b7e22be902e764c89f84076a712b0f,
+  playerPrefab: {fileID: 8996779811276726940, guid: 0fc8381059a849049865ee58a40dcc00,
     type: 3}

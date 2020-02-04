@@ -15,11 +15,13 @@ using UnityEditor;
 
 namespace Graphene.SignalR
 {
-    public class NetworkClientManager : IDisposable
+    public class NetworkClientManager : IDisposable, ITickable
     {
         public event Action OnConnected, OnDisconnected;
 
-        public event Action<NetworkClient> OnClientConnected, OnClientDisconnected, OnClientUpdate;
+        public event Action<NetworkClient> OnClientConnected;
+        public event Action<string> OnClientDisconnected;
+        public event Action<NetworkClient> OnClientUpdate;
 
         private readonly int _timeout;
         private readonly Http _http;
@@ -36,10 +38,14 @@ namespace Graphene.SignalR
         public NetworkClient Self => _connections.Self;
         public IReadOnlyList<NetworkClient> Clients => _connections.Clients;
 
+        private readonly Queue<Action> _mainThreadPool;
+
         public NetworkClientManager(string baseUrl, string socketPath, int timeout, Http http)
         {
             _http = http;
             _timeout = timeout;
+
+            _mainThreadPool = new Queue<Action>();
 
             _connection = new HubConnectionBuilder()
                 .WithUrl($"{baseUrl}{socketPath}",
@@ -81,8 +87,8 @@ namespace Graphene.SignalR
         {
             Debug.Log(client);
             _connections.Update(client);
-            
-            OnClientUpdate?.Invoke(client);
+
+            _mainThreadPool.Enqueue(() => OnClientUpdate?.Invoke(client));
         }
 
 
@@ -112,6 +118,8 @@ namespace Graphene.SignalR
 
         private async Task ReConnect(Exception error)
         {
+            if (!_isDisposed) return;
+            
             Debug.LogError(error);
 
             if (_connected)
@@ -125,7 +133,7 @@ namespace Graphene.SignalR
         private void OnDisconnectedToServer()
         {
             _connected = false;
-            OnDisconnected?.Invoke();
+            _mainThreadPool.Enqueue(() => OnDisconnected?.Invoke());
             Debug.Log("Disconnected");
         }
 
@@ -141,7 +149,7 @@ namespace Graphene.SignalR
             {
                 _connections.AddSelf(userName, id);
                 _connected = true;
-                OnConnected?.Invoke();
+                _mainThreadPool.Enqueue(() => OnConnected?.Invoke());
                 Debug.Log("Connection started");
                 return;
             }
@@ -150,7 +158,7 @@ namespace Graphene.SignalR
 
             Debug.Log($"OnConnected: {userName} {userName == _userName}");
 
-            OnClientConnected?.Invoke(_connections[i]);
+            _mainThreadPool.Enqueue(() => OnClientConnected?.Invoke(_connections[i]));
         }
 
         private void ClientDisconnected(string userName, string id)
@@ -164,7 +172,8 @@ namespace Graphene.SignalR
 
             if (i >= 0)
             {
-                OnClientDisconnected?.Invoke(_connections[i]);
+                var username = _connections[i].userName;
+                _mainThreadPool.Enqueue(() => OnClientDisconnected?.Invoke(username));
                 _connections.RemoveAt(i);
             }
             else
@@ -186,6 +195,24 @@ namespace Graphene.SignalR
                     var res = JsonConvert.DeserializeObject<T>(json);
 
                     response(res);
+                    return;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Failed to deserialize message\n" + e);
+                }
+            });
+        }
+
+        public void RegisterHandler<T>(string handlerName, [NotNull] Action<Guid, T> response)
+        {
+            _connection.On<Guid, string>(handlerName, (id, json) =>
+            {
+                try
+                {
+                    var res = JsonConvert.DeserializeObject<T>(json);
+
+                    response(id, res);
                     return;
                 }
                 catch (Exception e)
@@ -222,7 +249,7 @@ namespace Graphene.SignalR
 
         public void UnregisterHandler(string handlerName)
         {
-            throw new NotImplementedException();
+            Debug.LogError("NotImplementedException");
         }
 
         #endregion
@@ -258,5 +285,18 @@ namespace Graphene.SignalR
         }
 
         #endregion
+
+        public void Tick()
+        {
+            if (_mainThreadPool.Count > 0)
+            {
+                _mainThreadPool.Dequeue()();
+            }
+        }
+
+        public NetworkClient GetClient(string userName)
+        {
+            return _connections.Find(userName);
+        }
     }
 }

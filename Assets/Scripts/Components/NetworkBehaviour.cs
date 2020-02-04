@@ -1,4 +1,5 @@
 ﻿using System;
+using Graphene.SharedModels.Network;
 using Graphene.SignalR;
 using UnityEngine;
 using Zenject;
@@ -10,7 +11,10 @@ namespace Components
     {
         [Inject] protected NetworkClientManager NetworkController;
         protected NetworkId NetworkId;
+        public NetworkClient Client { get; private set; }
 
+        private const string CreateHandler = "CreatedBehaviour";
+        private const string DestroyHandler = "DestriedBehaviour";
 
         public bool IsLocal
         {
@@ -33,32 +37,55 @@ namespace Components
             NetworkId.Initialize();
         }
 
+        protected virtual void OnDestroy()
+        {
+            NetworkController.SendToAll(DestroyHandler, Id, Client.userName);
+        }
+
         private void GetNetId()
         {
             if (NetworkId == null)
             {
                 NetworkId = GetComponent<NetworkId>();
-                
+
                 if (NetworkId == null)
                 {
                     NetworkId = gameObject.AddComponent<NetworkId>();
                 }
             }
-
         }
 
-        private void Initialize()
+        private void Initialize(NetworkClient client)
         {
             GetNetId();
+
+            Client = client;
 
             NetworkId.Initialize();
+
+            SyncNetwork();
+
+            Setup();
         }
 
-        private void Initialize(Guid id)
+        private void Initialize(NetworkClient client, Guid id)
         {
             GetNetId();
 
+            Client = client;
+
             NetworkId.Initialize(id);
+
+            Setup();
+        }
+
+        public void SyncNetwork()
+        {
+            NetworkController.SendToAll(CreateHandler, Id, Client.userName);
+        }
+
+        protected virtual void Setup()
+        {
         }
 
         public class Factory : PlaceholderFactory<NetworkBehaviour>
@@ -68,22 +95,26 @@ namespace Components
                 behaviour.name = "NetworkBehaviourClone";
                 behaviour.transform.SetParent(null, false);
             }
-            
-            
+
             public override NetworkBehaviour Create()
+            {
+                throw new NotImplementedException();
+            }
+
+            public NetworkBehaviour Create(NetworkClient client)
             {
                 var behaviour = base.Create();
                 Setup(behaviour);
-                behaviour.Initialize();
+                behaviour.Initialize(client);
 
                 return behaviour;
             }
 
-            public NetworkBehaviour Create(Guid id)
+            public NetworkBehaviour Create(NetworkClient client, Guid id)
             {
                 var behaviour = base.Create();
                 Setup(behaviour);
-                behaviour.Initialize(id);
+                behaviour.Initialize(client, id);
 
                 return behaviour;
             }
