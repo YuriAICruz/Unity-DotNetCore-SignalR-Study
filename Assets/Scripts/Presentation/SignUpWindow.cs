@@ -26,10 +26,10 @@ namespace Presentation
 
             Hide();
             _authentication.UserLoggedIn += Hide;
-            _authentication.UserSignedIn += Hide;
+            _authentication.UserSignedUp += Hide;
             
-            _authentication.ShowSignIn += Show;
-            _authentication.ShowSignUp += Hide;
+            _authentication.ShowSignIn += Hide;
+            _authentication.ShowSignUp += Show;
             
             signIn.onClick.AddListener(ShowSignIn);
         }
@@ -42,7 +42,7 @@ namespace Presentation
         private void OnDestroy()
         {
             _authentication.UserLoggedIn -= Hide;
-            _authentication.UserSignedIn -= Hide;
+            _authentication.UserSignedUp -= Hide;
             
             _authentication.ShowSignIn -= Show;
             _authentication.ShowSignUp -= Hide;

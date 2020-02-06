@@ -23,7 +23,7 @@ namespace Presentation
             base.Awake();
 
             _authentication.UserLoggedIn += Hide;
-            _authentication.UserSignedIn += Hide;
+            _authentication.UserSignedUp += Hide;
             
             _authentication.ShowSignIn += Show;
             _authentication.ShowSignUp += Hide;
@@ -37,7 +37,7 @@ namespace Presentation
         private void OnDestroy()
         {
             _authentication.UserLoggedIn -= Hide;
-            _authentication.UserSignedIn -= Hide;
+            _authentication.UserSignedUp -= Hide;
             
             _authentication.ShowSignIn -= Show;
             _authentication.ShowSignUp -= Hide;

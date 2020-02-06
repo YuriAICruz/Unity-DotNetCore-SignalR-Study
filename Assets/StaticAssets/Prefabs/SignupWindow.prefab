@@ -27,12 +27,17 @@ PrefabInstance:
     - target: {fileID: 7129924085459757515, guid: 5723256d9e8e70e40a86654143fbb7bb,
         type: 3}
       propertyPath: m_ContentType
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7129924085459757515, guid: 5723256d9e8e70e40a86654143fbb7bb,
+        type: 3}
+      propertyPath: m_KeyboardType
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 7129924085459757515, guid: 5723256d9e8e70e40a86654143fbb7bb,
         type: 3}
-      propertyPath: m_InputType
-      value: 2
+      propertyPath: m_CharacterValidation
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7508550073002073058, guid: 5723256d9e8e70e40a86654143fbb7bb,
         type: 3}
@@ -208,17 +213,17 @@ PrefabInstance:
     - target: {fileID: 3207315008885594463, guid: d021fb53899f849458dee63df2d5bfc5,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 3207315008885594463, guid: d021fb53899f849458dee63df2d5bfc5,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 3207315008885594463, guid: d021fb53899f849458dee63df2d5bfc5,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 3207315008885594463, guid: d021fb53899f849458dee63df2d5bfc5,
         type: 3}

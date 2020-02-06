@@ -15,7 +15,7 @@ namespace Presentation.Managers
             _auth = auth;
 
             _auth.UserLoggedIn += UserOn;
-            _auth.UserSignedIn += UserOn;
+            _auth.UserSignedUp += UserOn;
 
             _auth.NetworkOn += NetworkOn;
 
@@ -26,7 +26,7 @@ namespace Presentation.Managers
         public void Dispose()
         {
             _auth.UserLoggedIn -= UserOn;
-            _auth.UserSignedIn -= UserOn;
+            _auth.UserSignedUp -= UserOn;
 
             _auth.NetworkOn -= NetworkOn;
 

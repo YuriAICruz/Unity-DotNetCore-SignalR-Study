@@ -18,9 +18,9 @@ namespace Controllers
 
         public event Action NetworkOn;
         public event Action NetworkOff;
-        
+
         public event Action UserLoggedIn;
-        public event Action UserSignedIn;
+        public event Action UserSignedUp;
         public event Action UserSignedOut;
         public event Action ShowSignUp;
         public event Action ShowSignIn;
@@ -40,7 +40,7 @@ namespace Controllers
 
             _network.OnConnected += NetworkConnected;
             _network.OnDisconnected += NetworkDisconnected;
-            
+
             _workingThreads = new Queue<Action>();
 
             _notification.OnRequestNotAuthorized += NotAuthorized;
@@ -68,7 +68,7 @@ namespace Controllers
 
         private void NetworkConnected()
         {
-            NetworkOn?.Invoke();    
+            NetworkOn?.Invoke();
         }
 
         void OnLoggedIn(UserModelView userModelView)
@@ -76,7 +76,16 @@ namespace Controllers
             IsLoggedIn = true;
             UserLoggedIn?.Invoke();
             CurrentUserModelView = userModelView;
-            
+
+            _network?.Connect(CurrentUserModelView.UserName);
+        }
+
+        void OnLoggedIn(RegisterModelView userModelView)
+        {
+            IsLoggedIn = true;
+            UserSignedUp?.Invoke();
+            CurrentUserModelView = new UserModelView(userModelView.UserName, userModelView.Email);
+
             _network?.Connect(CurrentUserModelView.UserName);
         }
 
@@ -103,17 +112,17 @@ namespace Controllers
         }
 
         #region Navigation
-        
+
         public void SignIn()
         {
             ShowSignIn?.Invoke();
         }
-        
+
         public void SignUp()
         {
             ShowSignUp?.Invoke();
         }
-        
+
         #endregion
 
         #region Actions
@@ -187,7 +196,7 @@ namespace Controllers
             _isBusy = false;
 
             if (result.Success)
-            { 
+            {
                 OnLoggedIn(result.Response);
                 onResponse?.Invoke(true);
                 return;
@@ -203,8 +212,7 @@ namespace Controllers
 
             if (result.Success)
             {
-                IsLoggedIn = true;
-                UserSignedIn?.Invoke();
+                OnLoggedIn(result.Response);
                 onResponse?.Invoke(true);
                 return;
             }
